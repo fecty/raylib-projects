@@ -5,25 +5,33 @@
 
 CC := g++
 CC_FLAGS := -std=c++17 -I../../include -L../../lib -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
-CC_OTHER_FLAGS := -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Werror -O0 -g
+CC_OTHER_FLAGS := -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -O0 -g
 BIN_DIR := bin
 SOURCE := main
-OTHER_SOURCES := 
+OTHER_SOURCES := objects.cpp
 
-all: clear test
+all: clear build-test
 
 
-${BIN_DIR}/${SOURCE}.out: ${SOURCE}.cpp ${BIN_DIR}
+${BIN_DIR}/${SOURCE}.out: ${SOURCE}.cpp ${BIN_DIR} 
 	@echo "Building ${BIN_DIR}/${SOURCE}.out"
 	@${CC} ${SOURCE}.cpp ${OTHER_SOURCES} -o ${BIN_DIR}/${SOURCE}.out ${CC_FLAGS} ${CC_OTHER_FLAGS}
 
 
-test: ${BIN_DIR}/${SOURCE}.out ${BIN_DIR}
+test: ${BIN_DIR}/${SOURCE}.out ${BIN_DIR} 
 	./${BIN_DIR}/${SOURCE}.out
+
+build-test: ${BIN_DIR}/${SOURCE}.out ${BIN_DIR}
+	@${CC} ${SOURCE}.cpp ${OTHER_SOURCES} -o ${BIN_DIR}/${SOURCE}.out ${CC_FLAGS} ${CC_OTHER_FLAGS}
+	./${BIN_DIR}/${SOURCE}.out
+
 
 
 ${BIN_DIR}:
 	mkdir ${BIN_DIR}
+
+${OTHER_SOURCES}:
+	echo "build"
 
 
 clear:
