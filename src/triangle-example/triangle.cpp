@@ -21,8 +21,11 @@ Triangle::Triangle(int w, int h)
     v = orientation;
     SetTrianglePosition(pos);
     // centroid = {(1 / 3.f) * (v.a.x + v.b.x + v.c.x), (1 / 3.f) * (v.a.y + v.b.y + v.c.y)};
-
     centroid = {(1 / 3.f) * (orientation.a.x + orientation.b.x + orientation.c.x), (1 / 3.f) * (orientation.a.y + orientation.b.y + orientation.c.y)};
+
+    pos = {w / 2.f, h / 2.f};
+    color = RED;
+    25
 }
 
 void Triangle::Draw()
