@@ -37,11 +37,12 @@ int main()
         if (CheckCollisionCircleRec(circle.position, circle.radius, {square.position.x - square.size / 2, square.position.y - square.size / 2, square.size, square.size}))
         {
             square.isCollision(true);
-            cout << "true" << '\n';
+            cout << "Collision: true" << '\n';
         }
         else
         {
             square.isCollision(false);
+            cout << "Collision: false" << '\n';
         }
 
         ClearBackground(BG_COLOR);

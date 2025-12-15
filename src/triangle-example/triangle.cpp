@@ -25,7 +25,6 @@ Triangle::Triangle(int w, int h)
 
     pos = {w / 2.f, h / 2.f};
     color = RED;
-    25
 }
 
 void Triangle::Draw()
