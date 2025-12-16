@@ -14,15 +14,18 @@ private:
 
 public:
     float size;
+    float angleFromHeightVector;
     Color color;
     Vector2 position;
     Vector2 velocity;
     Vector2 acceleration;
     Vector2 centroid;
-    Vector2 triangleDir;
-    Vertices baseOrientation;
-    Vertices orientation;
+
     Vertices vertices;
+    Vertices orientation;
+
+    Vertices baseOrientation;
+    Vector2 triangleDir;
 
     Triangle(int w, int h);
     void Draw();

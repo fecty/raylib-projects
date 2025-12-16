@@ -30,18 +30,18 @@ int main()
         if (IsKeyDown(KEY_S))
             triangle.MoveTriangle(0, +speed);
 
-        if (IsKeyDown(KEY_E))
-        {
+        // if (IsKeyDown(KEY_E))
+        // {
 
-            angle += -.01;
-            triangle.RotateTriangle(angle);
-        }
-        if (IsKeyDown(KEY_Q))
-        {
+        //     angle += -.01;
+        //     triangle.RotateTriangle(angle);
+        // }
+        // if (IsKeyDown(KEY_Q))
+        // {
 
-            angle += +.01;
-            triangle.RotateTriangle(angle);
-                }
+        //     angle += +.01;
+        //     triangle.RotateTriangle(angle);
+        //         }
 
         // Updates
 

@@ -3,10 +3,49 @@
 #include <iostream>
 #include <math.h>
 
-Triangle::Triangle(int w, int h) {};
-void Triangle::Draw() {};
-void Triangle::SetTrianglePosition(Vector2 newPos) {};
-void Triangle::MoveTriangle(float x, float y) {};
+Triangle::Triangle(int w, int h)
+{
+    position = {w / 2.f, h / 2.f};
+    color = RED;
+    size = 100;
+    angleFromHeightVector = PI / 5.f;
+    float height = 2 * size * cosf(angleFromHeightVector);
+
+    orientation = {
+        {(0.0f * size), (1.0f * height)},
+        {(sinf(angleFromHeightVector) * size), (-cosf(angleFromHeightVector) * size)},
+        {(sinf(angleFromHeightVector) * -size), (cosf(angleFromHeightVector) * -size)},
+    };
+    vertices = orientation;
+    centroid = {(1 / 3.f) * (vertices.a.x + vertices.b.x + vertices.c.x), (1 / 3.f) * (vertices.a.y + vertices.b.y + vertices.c.y)};
+    SetTrianglePosition(position);
+};
+
+void Triangle::Draw()
+{
+    DrawTriangle(vertices.a, vertices.b, vertices.c, color);
+    DrawCircle(centroid.x, centroid.y, 10, BLUE);
+};
+void Triangle::SetTrianglePosition(Vector2 newPos)
+{
+    Vertices &v = vertices;
+    v.a.x = newPos.x + orientation.a.x;
+    v.a.y = newPos.y + orientation.a.y;
+
+    v.b.x = newPos.x + orientation.b.x;
+    v.b.y = newPos.y + orientation.b.y;
+
+    v.c.x = newPos.x + orientation.c.x;
+    v.c.y = newPos.y + orientation.c.y;
+    centroid = {(1 / 3.f) * (vertices.a.x + vertices.b.x + vertices.c.x), (1 / 3.f) * (vertices.a.y + vertices.b.y + vertices.c.y)};
+    position = newPos;
+};
+
+void Triangle::MoveTriangle(float x, float y)
+{
+    std::cout << "Moving" << '\n';
+    SetTrianglePosition(Vector2{position.x + x, position.y + y});
+};
 void Triangle::SetTriangleRotation(float angle) {};
 void Triangle::RotateTriangle(float angle) {};
 
@@ -16,11 +55,11 @@ void Triangle::RotateTriangle(float angle) {};
 //     color = RED;
 //     size = 100;
 
-//     baseOrientation = {
-//         {(0.0f * size), (0.0f * size)},
-//         {(0.0f * size), (1.0f * size)},
-//         {(2.0f * size), (0.5f * size)},
-//     };
+// baseOrientation = {
+//     {(0.0f * size), (0.0f * size)},
+//     {(0.0f * size), (1.0f * size)},
+//     {(2.0f * size), (0.5f * size)},
+// };
 //     orientation = baseOrientation;
 
 //     Vector2 horz = {0, 1};
