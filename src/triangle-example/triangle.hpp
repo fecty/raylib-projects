@@ -13,11 +13,11 @@ private:
     };
 
 public:
-    Vector2 pos;
-    Vector2 vel;
-    Vector2 acc;
-    Color color;
     float size;
+    Color color;
+    Vector2 position;
+    Vector2 velocity;
+    Vector2 acceleration;
     Vector2 centroid;
     Vector2 triangleDir;
     Vertices baseOrientation;

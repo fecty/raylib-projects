@@ -3,82 +3,89 @@
 #include <iostream>
 #include <math.h>
 
-Triangle::Triangle(int w, int h)
-{
-    pos = {w / 2.f, h / 2.f};
-    color = RED;
-    size = 100;
+Triangle::Triangle(int w, int h) {};
+void Triangle::Draw() {};
+void Triangle::SetTrianglePosition(Vector2 newPos) {};
+void Triangle::MoveTriangle(float x, float y) {};
+void Triangle::SetTriangleRotation(float angle) {};
+void Triangle::RotateTriangle(float angle) {};
 
-    baseOrientation = {
-        {(0.0f * size), (0.0f * size)},
-        {(0.0f * size), (1.0f * size)},
-        {(2.0f * size), (0.5f * size)},
-    };
-    orientation = baseOrientation;
+// Triangle::Triangle(int w, int h)
+// {
+//     pos = {w / 2.f, h / 2.f};
+//     color = RED;
+//     size = 100;
 
-    Vector2 horz = {0, 1};
+//     baseOrientation = {
+//         {(0.0f * size), (0.0f * size)},
+//         {(0.0f * size), (1.0f * size)},
+//         {(2.0f * size), (0.5f * size)},
+//     };
+//     orientation = baseOrientation;
 
-    v = orientation;
-    SetTrianglePosition(pos);
-    // centroid = {(1 / 3.f) * (v.a.x + v.b.x + v.c.x), (1 / 3.f) * (v.a.y + v.b.y + v.c.y)};
-    centroid = {(1 / 3.f) * (orientation.a.x + orientation.b.x + orientation.c.x), (1 / 3.f) * (orientation.a.y + orientation.b.y + orientation.c.y)};
+//     Vector2 horz = {0, 1};
 
-    pos = {w / 2.f, h / 2.f};
-    color = RED;
-}
+//     v = orientation;
+//     SetTrianglePosition(pos);
+//     // centroid = {(1 / 3.f) * (v.a.x + v.b.x + v.c.x), (1 / 3.f) * (v.a.y + v.b.y + v.c.y)};
+//     centroid = {(1 / 3.f) * (orientation.a.x + orientation.b.x + orientation.c.x), (1 / 3.f) * (orientation.a.y + orientation.b.y + orientation.c.y)};
 
-void Triangle::Draw()
-{
+//     pos = {w / 2.f, h / 2.f};
+//     color = RED;
+// }
 
-    // std::cout << v.a.x << ' ' << v.a.y << "\t\t";
-    // std::cout << v.b.x << ' ' << v.b.y << "\t\t";
-    // std::cout << v.c.x << ' ' << v.c.y << '\n';
+// void Triangle::Draw()
+// {
 
-    DrawTriangle(v.a, v.b, v.c, color);
+//     // std::cout << v.a.x << ' ' << v.a.y << "\t\t";
+//     // std::cout << v.b.x << ' ' << v.b.y << "\t\t";
+//     // std::cout << v.c.x << ' ' << v.c.y << '\n';
 
-    // DrawCircle(centroid.x, centroid.y, 10.f, BLACK);
-    // DrawTriangle(orientation.a, orientation.b, orientation.c, {255, 0, 0, 100});
-}
+//     DrawTriangle(v.a, v.b, v.c, color);
 
-void Triangle::SetTrianglePosition(Vector2 newPos)
-{
-    v.a.x = newPos.x + orientation.a.x;
-    v.a.y = newPos.y + orientation.a.y;
+//     // DrawCircle(centroid.x, centroid.y, 10.f, BLACK);
+//     // DrawTriangle(orientation.a, orientation.b, orientation.c, {255, 0, 0, 100});
+// }
 
-    v.b.x = newPos.x + orientation.b.x;
-    v.b.y = newPos.y + orientation.b.y;
+// void Triangle::SetTrianglePosition(Vector2 newPos)
+// {
+//     v.a.x = newPos.x + orientation.a.x;
+//     v.a.y = newPos.y + orientation.a.y;
 
-    v.c.x = newPos.x + orientation.c.x;
-    v.c.y = newPos.y + orientation.c.y;
-    centroid = {(1 / 3.f) * (orientation.a.x + orientation.b.x + orientation.c.x), (1 / 3.f) * (orientation.a.y + orientation.b.y + orientation.c.y)};
-}
+//     v.b.x = newPos.x + orientation.b.x;
+//     v.b.y = newPos.y + orientation.b.y;
 
-void Triangle::MoveTriangle(float x, float y)
-{
-}
+//     v.c.x = newPos.x + orientation.c.x;
+//     v.c.y = newPos.y + orientation.c.y;
+//     centroid = {(1 / 3.f) * (orientation.a.x + orientation.b.x + orientation.c.x), (1 / 3.f) * (orientation.a.y + orientation.b.y + orientation.c.y)};
+// }
 
-void Triangle::RotateTriangle(float angle)
-{
+// void Triangle::MoveTriangle(float x, float y)
+// {
+// }
 
-    std::cout << angle << '\n';
+// void Triangle::RotateTriangle(float angle)
+// {
 
-    Vector2 g = centroid;
+//     std::cout << angle << '\n';
 
-    float cosA = cosf(angle);
-    float sinA = sinf(angle);
+//     Vector2 g = centroid;
 
-    auto rotateFromBase = [&](const Vector2 &src, Vector2 &dst)
-    {
-        float x = src.x - g.x;
-        float y = src.y - g.y;
+//     float cosA = cosf(angle);
+//     float sinA = sinf(angle);
 
-        dst.x = x * cosA - y * sinA + g.x;
-        dst.y = x * sinA + y * cosA + g.y;
-    };
+//     auto rotateFromBase = [&](const Vector2 &src, Vector2 &dst)
+//     {
+//         float x = src.x - g.x;
+//         float y = src.y - g.y;
 
-    rotateFromBase(baseOrientation.a, orientation.a);
-    rotateFromBase(baseOrientation.b, orientation.b);
-    rotateFromBase(baseOrientation.c, orientation.c);
+//         dst.x = x * cosA - y * sinA + g.x;
+//         dst.y = x * sinA + y * cosA + g.y;
+//     };
 
-    SetTrianglePosition(pos);
-}
+//     rotateFromBase(baseOrientation.a, orientation.a);
+//     rotateFromBase(baseOrientation.b, orientation.b);
+//     rotateFromBase(baseOrientation.c, orientation.c);
+
+//     SetTrianglePosition(pos);
+// }
