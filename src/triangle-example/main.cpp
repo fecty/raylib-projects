@@ -1,6 +1,6 @@
 #include <iostream>
 #include <raylib.h>
-
+#include <raymath.h>
 #include "definitions.hpp"
 #include "triangle.hpp"
 
@@ -11,12 +11,16 @@ int main()
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE);
     SetTargetFPS(FPS);
 
-    int w = GetScreenWidth();
-    int h = GetScreenHeight();
+    float w = (float)GetScreenWidth();
+    float h = (float)GetScreenHeight();
 
-    Triangle triangle(w, h);
+    // Main loop
+    Triangle triangle((int)(w / 2.f),
+                      (int)(h / 2.f),
+                      100,
+                      BLUE,
+                      true);
     float speed = 10.f;
-    float angle = 0;
     while (!WindowShouldClose())
     {
 
@@ -30,26 +34,28 @@ int main()
         if (IsKeyDown(KEY_S))
             triangle.MoveTriangle(0, +speed);
 
-        // if (IsKeyDown(KEY_E))
-        // {
-
-        //     angle += -.01;
-        //     triangle.RotateTriangle(angle);
-        // }
-        // if (IsKeyDown(KEY_Q))
-        // {
-
-        //     angle += +.01;
-        //     triangle.RotateTriangle(angle);
-        //         }
-
+        if (IsKeyDown(KEY_E))
+            triangle.RotateTriangle(.1f);
+        if (IsKeyDown(KEY_Q))
+            triangle.RotateTriangle(-.1f);
+        if (IsKeyDown(KEY_SPACE))
+        {
+            triangle.ResetTrianglePosition();
+            triangle.ResetTriangleRotation();
+        }
         // Updates
+
+        Vector2 mousePos = GetMousePosition();
+
+        triangle.RotateToVector(mousePos);
+        // cout << "MOUSE: \t" << "x: " << mousePos.x << "\ty: " << mousePos.y << '\n';
 
         // Drawing
         BeginDrawing();
         ClearBackground(BG_COLOR);
 
         triangle.Draw();
+        DrawCircle((int)mousePos.x, (int)mousePos.y, 10, RED);
 
         EndDrawing();
     }

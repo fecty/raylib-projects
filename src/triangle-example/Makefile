@@ -1,10 +1,10 @@
 # For Reference
 # 	g++ -std=c++17 main.cpp -o main.out -I../../include -L../../lib -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
-
+# -isystem ../../include instead of -I../../include to disable third-party warnings.
 .PHONY: clear clean
 
 CC := g++
-CC_FLAGS := -std=c++17 -I../../include -L../../lib -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+CC_FLAGS := -std=c++17 -isystem ../../include -L../../lib -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 CC_OTHER_FLAGS := -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -O0 -g
 BIN_DIR := bin
 SOURCE := main

@@ -1,130 +1,104 @@
 #include "triangle.hpp"
 #include <raylib.h>
+#include <raymath.h>
 #include <iostream>
 #include <math.h>
 
-Triangle::Triangle(int w, int h)
+Triangle::Triangle(int x, int y, float triangleSize, Color triangleColor, bool triangleShowCentroid)
 {
-    position = {w / 2.f, h / 2.f};
-    color = RED;
-    size = 100;
-    angleFromHeightVector = PI / 5.f;
-    float height = 2 * size * cosf(angleFromHeightVector);
+    originalPosition = {(float)x, (float)y};
+    position = {0, 0}; // set to original position at end of constructor
 
-    orientation = {
-        {(0.0f * size), (1.0f * height)},
-        {(sinf(angleFromHeightVector) * size), (-cosf(angleFromHeightVector) * size)},
-        {(sinf(angleFromHeightVector) * -size), (cosf(angleFromHeightVector) * -size)},
+    originalAngle = -PI / 2.f; // starting angle. points towards +x axis
+    rotatedAngle = 0.f;        // set to original rotation at end of constructor
+
+    size = triangleSize;
+    color = triangleColor;
+    showCentroid = triangleShowCentroid;
+
+    angleFromHeightVector = PI / 4.f;                      // determins the pointy-ness of the triangle
+    float height = 2 * size * cosf(angleFromHeightVector); // constraining element of the triangle
+    basisOrientation = {
+        {(0.0f * size), (1.0f * height)},                                               // POINT A
+        {(sinf(angleFromHeightVector) * size), (-cosf(angleFromHeightVector) * size)},  // POINT B
+        {(sinf(angleFromHeightVector) * -size), (cosf(angleFromHeightVector) * -size)}, // POINT C
     };
-    vertices = orientation;
-    centroid = {(1 / 3.f) * (vertices.a.x + vertices.b.x + vertices.c.x), (1 / 3.f) * (vertices.a.y + vertices.b.y + vertices.c.y)};
-    SetTrianglePosition(position);
+    orientation = basisOrientation;
+    vertices = basisOrientation;
+
+    // because of how the triangle is constructed, the centroid is always equal to the position
+    centroid = {(1 / 3.f) * (vertices.a.x + vertices.b.x + vertices.c.x),
+                (1 / 3.f) * (vertices.a.y + vertices.b.y + vertices.c.y)};
+
+    triangleDir = Vector2Normalize(Vector2Subtract(vertices.a, centroid));
+    SetTrianglePosition(originalPosition);
+    SetTriangleRotation(originalAngle);
 };
 
 void Triangle::Draw()
 {
     DrawTriangle(vertices.a, vertices.b, vertices.c, color);
-    DrawCircle(centroid.x, centroid.y, 10, BLUE);
+    if (showCentroid) // for centroid
+    {
+        DrawCircleLines((int)centroid.x, (int)centroid.y, size / 20.f + 1.f, WHITE);
+        DrawCircle((int)centroid.x, (int)centroid.y, size / 20.f, BLACK);
+    }
 };
+
 void Triangle::SetTrianglePosition(Vector2 newPos)
 {
-    Vertices &v = vertices;
-    v.a.x = newPos.x + orientation.a.x;
-    v.a.y = newPos.y + orientation.a.y;
-
-    v.b.x = newPos.x + orientation.b.x;
-    v.b.y = newPos.y + orientation.b.y;
-
-    v.c.x = newPos.x + orientation.c.x;
-    v.c.y = newPos.y + orientation.c.y;
-    centroid = {(1 / 3.f) * (vertices.a.x + vertices.b.x + vertices.c.x), (1 / 3.f) * (vertices.a.y + vertices.b.y + vertices.c.y)};
     position = newPos;
+    centroid = newPos;
+
+    vertices.a = Vector2Add(newPos, orientation.a);
+    vertices.b = Vector2Add(newPos, orientation.b);
+    vertices.c = Vector2Add(newPos, orientation.c);
+
+    // centroid = {(1 / 3.f) * (vertices.a.x + vertices.b.x + vertices.c.x),
+    //             (1 / 3.f) * (vertices.a.y + vertices.b.y + vertices.c.y)};
+
+    triangleDir = Vector2Normalize(Vector2Subtract(vertices.a, centroid));
 };
 
 void Triangle::MoveTriangle(float x, float y)
 {
-    std::cout << "Moving" << '\n';
     SetTrianglePosition(Vector2{position.x + x, position.y + y});
 };
-void Triangle::SetTriangleRotation(float angle) {};
-void Triangle::RotateTriangle(float angle) {};
 
-// Triangle::Triangle(int w, int h)
-// {
-//     pos = {w / 2.f, h / 2.f};
-//     color = RED;
-//     size = 100;
+void Triangle::ResetTrianglePosition()
+{
+    SetTrianglePosition(originalPosition);
+}
 
-// baseOrientation = {
-//     {(0.0f * size), (0.0f * size)},
-//     {(0.0f * size), (1.0f * size)},
-//     {(2.0f * size), (0.5f * size)},
-// };
-//     orientation = baseOrientation;
+void Triangle::SetTriangleRotation(float angle)
+{
+    rotatedAngle = angle;
+    auto rotateFromBasis = [&](Vector2 const &basisVector, Vector2 &vector)
+    {
+        vector.x = basisVector.x * cosf(angle) - basisVector.y * sinf(angle);
+        vector.y = basisVector.x * sinf(angle) + basisVector.y * cosf(angle);
+    };
 
-//     Vector2 horz = {0, 1};
+    rotateFromBasis(basisOrientation.a, orientation.a);
+    rotateFromBasis(basisOrientation.b, orientation.b);
+    rotateFromBasis(basisOrientation.c, orientation.c);
+    SetTrianglePosition(position);
+};
 
-//     v = orientation;
-//     SetTrianglePosition(pos);
-//     // centroid = {(1 / 3.f) * (v.a.x + v.b.x + v.c.x), (1 / 3.f) * (v.a.y + v.b.y + v.c.y)};
-//     centroid = {(1 / 3.f) * (orientation.a.x + orientation.b.x + orientation.c.x), (1 / 3.f) * (orientation.a.y + orientation.b.y + orientation.c.y)};
+void Triangle::RotateTriangle(float angle)
+{
+    rotatedAngle += angle;
+    SetTriangleRotation(rotatedAngle);
+};
 
-//     pos = {w / 2.f, h / 2.f};
-//     color = RED;
-// }
+void Triangle::ResetTriangleRotation()
+{
+    SetTriangleRotation(originalAngle);
+};
 
-// void Triangle::Draw()
-// {
-
-//     // std::cout << v.a.x << ' ' << v.a.y << "\t\t";
-//     // std::cout << v.b.x << ' ' << v.b.y << "\t\t";
-//     // std::cout << v.c.x << ' ' << v.c.y << '\n';
-
-//     DrawTriangle(v.a, v.b, v.c, color);
-
-//     // DrawCircle(centroid.x, centroid.y, 10.f, BLACK);
-//     // DrawTriangle(orientation.a, orientation.b, orientation.c, {255, 0, 0, 100});
-// }
-
-// void Triangle::SetTrianglePosition(Vector2 newPos)
-// {
-//     v.a.x = newPos.x + orientation.a.x;
-//     v.a.y = newPos.y + orientation.a.y;
-
-//     v.b.x = newPos.x + orientation.b.x;
-//     v.b.y = newPos.y + orientation.b.y;
-
-//     v.c.x = newPos.x + orientation.c.x;
-//     v.c.y = newPos.y + orientation.c.y;
-//     centroid = {(1 / 3.f) * (orientation.a.x + orientation.b.x + orientation.c.x), (1 / 3.f) * (orientation.a.y + orientation.b.y + orientation.c.y)};
-// }
-
-// void Triangle::MoveTriangle(float x, float y)
-// {
-// }
-
-// void Triangle::RotateTriangle(float angle)
-// {
-
-//     std::cout << angle << '\n';
-
-//     Vector2 g = centroid;
-
-//     float cosA = cosf(angle);
-//     float sinA = sinf(angle);
-
-//     auto rotateFromBase = [&](const Vector2 &src, Vector2 &dst)
-//     {
-//         float x = src.x - g.x;
-//         float y = src.y - g.y;
-
-//         dst.x = x * cosA - y * sinA + g.x;
-//         dst.y = x * sinA + y * cosA + g.y;
-//     };
-
-//     rotateFromBase(baseOrientation.a, orientation.a);
-//     rotateFromBase(baseOrientation.b, orientation.b);
-//     rotateFromBase(baseOrientation.c, orientation.c);
-
-//     SetTrianglePosition(pos);
-// }
+void Triangle::RotateToVector(Vector2 vector)
+{
+    vector = Vector2Normalize(Vector2Subtract(vector, centroid));
+    RotateTriangle(atan2(triangleDir.x * vector.y - vector.x * triangleDir.y,
+                         triangleDir.x * vector.x + triangleDir.y * vector.y));
+};
