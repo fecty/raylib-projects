@@ -6,6 +6,17 @@
 #include <random>
 
 using namespace std;
+
+Vector2 calculateCenterVector(Triangle t[])
+{
+    Vector2 centerVector = {0, 0};
+    for (int i = 0; i < TRIANGLE_NUMBERS; i++)
+    {
+        centerVector += (t[i].position / TRIANGLE_NUMBERS);
+    }
+    return centerVector;
+};
+
 int main()
 {
     SetTraceLogLevel(LOG_ERROR);
@@ -48,24 +59,39 @@ int main()
         BeginDrawing();
         ClearBackground({0, 0, 0, 100});
 
+        Vector2 centerV = calculateCenterVector(triangles);
         // Drawing Area Start
         for (int i = 0; i < TRIANGLE_NUMBERS; i++)
         {
 
             Triangle &t = triangles[i];
             // t.RotateToVector(mousePos);
-            Vector2 TriangleToMouseV = Vector2Subtract(GetMousePosition(), t.position);
+            Vector2 TriangleToMouseV = Vector2Subtract(mousePos, t.position);
+            Vector2 TriangleToCenterV = Vector2Subtract(centerV, t.position);
 
             t.acceleration = Vector2Normalize(TriangleToMouseV) * TRIANGLE_ACCELERATION_FACTOR;
-            t.velocity += t.acceleration * dt; // v_f = v_i + a*dt
+
+            // Triangle Separation from other Triangles
+            for (int j = 0; j < TRIANGLE_NUMBERS; j++)
+            {
+                Triangle &other = triangles[j];
+                Vector2 TriangleToOtherV = Vector2Subtract(other.position, t.position);
+                t.acceleration += Vector2Normalize(TriangleToOtherV) * -TRIANGLE_SEPARATION_FACTOR;
+            }
+
             t.velocity *= TRIANGLE_VELOCITY_FRICTION_FACTOR;
-            t.position += t.velocity * dt; // x_f = x_i + v*dt
+            // t.acceleration += Vector2Normalize(TriangleToCenterV) * -1 * (10000 / Vector2Length(TriangleToCenterV));
+            t.velocity += t.acceleration * dt; // v_f = v_i + a*dt
+            t.position += t.velocity * dt;     // x_f = x_i + v*dt
 
             t.RotateToVector(Vector2Subtract(mousePos, t.velocity * -1));
             t.SetTrianglePosition({t.position.x, t.position.y});
+
+            DrawCircleLines(centerV.x, centerV.y, 5, RED); // center vector of all triangles
             t.Draw();
         }
-        DrawCircle((int)mousePos.x, (int)mousePos.y, 10, RED);
+
+        DrawCircleLines((int)mousePos.x, (int)mousePos.y, 5, WHITE);
 
         // Drawing Area End
         EndDrawing();
