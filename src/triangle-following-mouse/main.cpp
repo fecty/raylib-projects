@@ -1,9 +1,9 @@
 #include <iostream>
+#include <random>
 #include <raylib.h>
 #include <raymath.h>
 #include "definitions.hpp"
 #include "triangle.hpp"
-#include <random>
 
 using namespace std;
 
@@ -17,11 +17,21 @@ Vector2 calculateCenterVector(Triangle t[])
     return centerVector;
 };
 
+bool IsOnScreen(Vector2 p)
+{
+    return p.x >= 0.f &&
+           p.x <= (float)GetScreenWidth() &&
+           p.y >= 0.f &&
+           p.y <= (float)GetScreenHeight();
+}
+
 int main()
 {
     SetTraceLogLevel(LOG_ERROR);
     SetConfigFlags(FLAG_WINDOW_TRANSPARENT);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE);
+    // InitWindow(GetMonitorWidth(GetCurrentMonitor()), GetMonitorHeight(GetCurrentMonitor()), SCREEN_TITLE);
+    // ToggleFullscreen();
     SetTargetFPS(FPS);
 
     float w = (float)GetScreenWidth();
@@ -54,6 +64,8 @@ int main()
         // Updates
         dt = GetFrameTime();
         Vector2 mousePos = GetMousePosition();
+        int trianglesOnscreen = 0;
+        float offScreenForceFactor = 1.f;
 
         // Drawing
         BeginDrawing();
@@ -65,11 +77,12 @@ int main()
         {
 
             Triangle &t = triangles[i];
-            // t.RotateToVector(mousePos);
-            Vector2 TriangleToMouseV = Vector2Subtract(mousePos, t.position);
-            Vector2 TriangleToCenterV = Vector2Subtract(centerV, t.position);
 
-            t.acceleration = Vector2Normalize(TriangleToMouseV) * TRIANGLE_ACCELERATION_FACTOR;
+            Vector2 TriangleToMouseV = Vector2Subtract(mousePos, t.position);
+            // Vector2 TriangleToCenterV = Vector2Subtract(centerV, t.position);
+
+            offScreenForceFactor = IsOnScreen(t.position) ? 1.0f : 2.0f; // double acceleration when t is offscreen
+            t.acceleration = Vector2Normalize(TriangleToMouseV) * TRIANGLE_ACCELERATION_FACTOR * offScreenForceFactor;
 
             // Triangle Separation from other Triangles
             for (int j = 0; j < TRIANGLE_NUMBERS; j++)
@@ -87,9 +100,16 @@ int main()
             t.RotateToVector(Vector2Subtract(mousePos, t.velocity * -1));
             t.SetTrianglePosition({t.position.x, t.position.y});
 
-            DrawCircleLines(centerV.x, centerV.y, 5, RED); // center vector of all triangles
+            DrawCircleLines((int)centerV.x, (int)centerV.y, 5, RED); // center vector of all triangles
+
+            if (IsOnScreen(t.position))
+                trianglesOnscreen++;
             t.Draw();
         }
+        // DrawText(TextFormat("Total Triangles: %d", TRIANGLE_NUMBERS), 5, 5, 20, WHITE);
+        DrawText(TextFormat("Triangles: %d/%d", TRIANGLE_NUMBERS, trianglesOnscreen), 5, 5, 20, WHITE);
+
+        trianglesOnscreen = 0;
 
         DrawCircleLines((int)mousePos.x, (int)mousePos.y, 5, WHITE);
 
