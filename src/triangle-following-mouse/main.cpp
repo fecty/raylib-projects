@@ -17,6 +17,16 @@ Vector2 calculateCenterVector(Triangle t[])
     return centerVector;
 };
 
+Vector2 calculateSumVelocity(Triangle t[])
+{
+    Vector2 velocityVector = {0, 0};
+    for (int i = 0; i < TRIANGLE_NUMBERS; i++)
+    {
+        velocityVector += (t[i].velocity / TRIANGLE_NUMBERS);
+    }
+    return velocityVector;
+};
+
 bool IsOnScreen(Vector2 p)
 {
     return p.x >= 0.f &&
@@ -43,7 +53,23 @@ int main()
     std::uniform_real_distribution<float> dist(0.0f, 1.0f);
 
     Triangle triangles[TRIANGLE_NUMBERS]; // Define multiple objects of Triangle class
-    const Color COLORS[TRIANGLE_MAX_COLORS] = {RED, BLUE, ORANGE, GREEN, YELLOW, MAGENTA, WHITE};
+
+    // const Color COLORS[TRIANGLE_MAX_COLORS] = {RED, BLUE, ORANGE, GREEN, YELLOW, MAGENTA, WHITE};
+
+    int alphaFactor = 0;
+    Color COLORS[TRIANGLE_MAX_COLORS] = {
+        {255, 20, 147, 255 - alphaFactor}, // neon pink
+        {0, 255, 255, 255 - alphaFactor},  // neon cyan
+        {57, 255, 20, 255 - alphaFactor},  // neon green
+        {255, 255, 0, 255 - alphaFactor},  // neon yellow
+        {255, 69, 0, 255 - alphaFactor},   // neon orange
+        {138, 43, 226, 255 - alphaFactor}, // neon purple
+        {0, 191, 255, 255 - alphaFactor},  // electric blue
+        {255, 0, 0, 255 - alphaFactor},    // neon red
+        {50, 255, 126, 255 - alphaFactor}, // neon mint
+        {255, 0, 255, 255 - alphaFactor}   // neon magenta
+    };
+
     for (int i = 0; i < TRIANGLE_NUMBERS; i++) // Preconfigure all triangle objects with base settings
     {
         Triangle &t = triangles[i];
@@ -52,7 +78,8 @@ int main()
                       dist(rng) * TRIANGLE_INITIAL_MAX_VELOCITY};
         t.SetTrianglePosition({dist(rng) * w,
                                dist(rng) * h});
-        t.UpdateTriangleColor(COLORS[(int)floor(dist(rng) * TRIANGLE_MAX_COLORS)]);
+        t.UpdateTriangleColor(COLORS[(int)floor(dist(rng) * TRIANGLE_MAX_COLORS)]); // looks colorful
+        // t.UpdateTriangleColor({255, 255, 255, 100}); // looks ghoulish
     }
 
     float dt;
@@ -69,9 +96,12 @@ int main()
 
         // Drawing
         BeginDrawing();
-        ClearBackground({0, 0, 0, 100});
+        ClearBackground({0, 0, 0, 150});
 
         Vector2 centerV = calculateCenterVector(triangles);
+        Vector2 sumVelocityV = Vector2Normalize(calculateSumVelocity(triangles)) * 100 + centerV;
+        // cout << "X: " << sumVelocityV.x << "\t Y: " << sumVelocityV.y << '\n';
+
         // Drawing Area Start
         for (int i = 0; i < TRIANGLE_NUMBERS; i++)
         {
@@ -79,7 +109,8 @@ int main()
             Triangle &t = triangles[i];
 
             Vector2 TriangleToMouseV = Vector2Subtract(mousePos, t.position);
-            // Vector2 TriangleToCenterV = Vector2Subtract(centerV, t.position);
+            Vector2 TriangleToCenterV = Vector2Subtract(centerV, t.position);
+            Vector2 TriangleToSumVelocityV = Vector2Subtract(sumVelocityV, t.position);
 
             offScreenForceFactor = IsOnScreen(t.position) ? 1.0f : 2.0f; // double acceleration when t is offscreen
             t.acceleration = Vector2Normalize(TriangleToMouseV) * TRIANGLE_ACCELERATION_FACTOR * offScreenForceFactor;
@@ -100,7 +131,8 @@ int main()
             t.RotateToVector(Vector2Subtract(mousePos, t.velocity * -1));
             t.SetTrianglePosition({t.position.x, t.position.y});
 
-            DrawCircleLines((int)centerV.x, (int)centerV.y, 5, RED); // center vector of all triangles
+            DrawCircleLines((int)centerV.x, (int)centerV.y, 10, RED);            // center vector of all triangles
+            DrawCircleLines((int)sumVelocityV.x, (int)sumVelocityV.y, 10, BLUE); // center vector of all triangles
 
             if (IsOnScreen(t.position))
                 trianglesOnscreen++;
@@ -111,7 +143,7 @@ int main()
 
         trianglesOnscreen = 0;
 
-        DrawCircleLines((int)mousePos.x, (int)mousePos.y, 5, WHITE);
+        DrawCircleLines((int)mousePos.x, (int)mousePos.y, 10, WHITE);
 
         // Drawing Area End
         EndDrawing();
