@@ -39,8 +39,8 @@ int main()
 {
     SetTraceLogLevel(LOG_ERROR);
     SetConfigFlags(FLAG_WINDOW_TRANSPARENT);
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE);
-    // InitWindow(GetMonitorWidth(GetCurrentMonitor()), GetMonitorHeight(GetCurrentMonitor()), SCREEN_TITLE);
+    // InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE);
+    InitWindow(GetMonitorWidth(GetCurrentMonitor()), GetMonitorHeight(GetCurrentMonitor()), SCREEN_TITLE);
     // ToggleFullscreen();
     SetTargetFPS(FPS);
 
@@ -54,33 +54,48 @@ int main()
 
     Triangle triangles[TRIANGLE_NUMBERS]; // Define multiple objects of Triangle class
 
-    // const Color COLORS[TRIANGLE_MAX_COLORS] = {RED, BLUE, ORANGE, GREEN, YELLOW, MAGENTA, WHITE};
+    // const Color COLORS[TRIANGLE_MAX_COLORS] = {
+    //     RED,
+    //     BLUE,
+    //     ORANGE,
+    //     GREEN,
+    //     YELLOW,
+    //     MAGENTA,
+    //     WHITE,
+    //     PURPLE,
+    //     VIOLET,
+    //     GOLD};
 
     int alphaFactor = 0;
     Color COLORS[TRIANGLE_MAX_COLORS] = {
-        {255, 20, 147, 255 - alphaFactor}, // neon pink
-        {0, 255, 255, 255 - alphaFactor},  // neon cyan
-        {57, 255, 20, 255 - alphaFactor},  // neon green
-        {255, 255, 0, 255 - alphaFactor},  // neon yellow
-        {255, 69, 0, 255 - alphaFactor},   // neon orange
-        {138, 43, 226, 255 - alphaFactor}, // neon purple
-        {0, 191, 255, 255 - alphaFactor},  // electric blue
-        {255, 0, 0, 255 - alphaFactor},    // neon red
-        {50, 255, 126, 255 - alphaFactor}, // neon mint
-        {255, 0, 255, 255 - alphaFactor}   // neon magenta
+        {255, 20, 147, (unsigned char)(255 - alphaFactor)}, // neon pink
+        {0, 255, 255, (unsigned char)(255 - alphaFactor)},  // neon cyan
+        {57, 255, 20, (unsigned char)(255 - alphaFactor)},  // neon green
+        {255, 255, 0, (unsigned char)(255 - alphaFactor)},  // neon yellow
+        {255, 69, 0, (unsigned char)(255 - alphaFactor)},   // neon orange
+        {138, 43, 226, (unsigned char)(255 - alphaFactor)}, // neon purple
+        {0, 191, 255, (unsigned char)(255 - alphaFactor)},  // electric blue
+        {255, 0, 0, (unsigned char)(255 - alphaFactor)},    // neon red
+        {50, 255, 126, (unsigned char)(255 - alphaFactor)}, // neon mint
+        {255, 0, 255, (unsigned char)(255 - alphaFactor)}   // neon magenta
     };
 
-    for (int i = 0; i < TRIANGLE_NUMBERS; i++) // Preconfigure all triangle objects with base settings
+    auto updateTriangles = [&]()
     {
-        Triangle &t = triangles[i];
+        for (int i = 0; i < TRIANGLE_NUMBERS; i++) // Preconfigure all triangle objects with base settings
+        {
+            Triangle &t = triangles[i];
 
-        t.velocity = {dist(rng) * TRIANGLE_INITIAL_MAX_VELOCITY,
-                      dist(rng) * TRIANGLE_INITIAL_MAX_VELOCITY};
-        t.SetTrianglePosition({dist(rng) * w,
-                               dist(rng) * h});
-        t.UpdateTriangleColor(COLORS[(int)floor(dist(rng) * TRIANGLE_MAX_COLORS)]); // looks colorful
-        // t.UpdateTriangleColor({255, 255, 255, 100}); // looks ghoulish
-    }
+            t.velocity = {dist(rng) * TRIANGLE_INITIAL_MAX_VELOCITY,
+                          dist(rng) * TRIANGLE_INITIAL_MAX_VELOCITY};
+            t.SetTrianglePosition({dist(rng) * w,
+                                   dist(rng) * h});
+            t.UpdateTriangleColor(COLORS[(int)floor(dist(rng) * TRIANGLE_MAX_COLORS)]); // looks colorful
+            // t.UpdateTriangleColor({255, 255, 255, 100}); // looks ghoulish
+        }
+    };
+
+    updateTriangles();
 
     float dt;
     while (!WindowShouldClose())
@@ -88,15 +103,25 @@ int main()
 
         // Event Handling
 
+        if (IsKeyPressed(KEY_R))
+            updateTriangles(); // reset position essentially
+
         // Updates
         dt = GetFrameTime();
         Vector2 mousePos = GetMousePosition();
         int trianglesOnscreen = 0;
         float offScreenForceFactor = 1.f;
 
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+            mousePos.x >= 5 &&
+            mousePos.x <= 185 &&
+            mousePos.y >= 25 &&
+            mousePos.y <= 45)
+            updateTriangles();
+
         // Drawing
         BeginDrawing();
-        ClearBackground({0, 0, 0, 150});
+        ClearBackground({0, 0, 0, 255});
 
         Vector2 centerV = calculateCenterVector(triangles);
         Vector2 sumVelocityV = Vector2Normalize(calculateSumVelocity(triangles)) * 100 + centerV;
@@ -109,8 +134,8 @@ int main()
             Triangle &t = triangles[i];
 
             Vector2 TriangleToMouseV = Vector2Subtract(mousePos, t.position);
-            Vector2 TriangleToCenterV = Vector2Subtract(centerV, t.position);
-            Vector2 TriangleToSumVelocityV = Vector2Subtract(sumVelocityV, t.position);
+            // Vector2 TriangleToCenterV = Vector2Subtract(centerV, t.position);
+            // Vector2 TriangleToSumVelocityV = Vector2Subtract(sumVelocityV, t.position);
 
             offScreenForceFactor = IsOnScreen(t.position) ? 1.0f : 2.0f; // double acceleration when t is offscreen
             t.acceleration = Vector2Normalize(TriangleToMouseV) * TRIANGLE_ACCELERATION_FACTOR * offScreenForceFactor;
@@ -140,6 +165,7 @@ int main()
         }
         // DrawText(TextFormat("Total Triangles: %d", TRIANGLE_NUMBERS), 5, 5, 20, WHITE);
         DrawText(TextFormat("Triangles: %d/%d", TRIANGLE_NUMBERS, trianglesOnscreen), 5, 5, 20, WHITE);
+        DrawText("Press R to reset", 5, 25, 20, WHITE);
 
         trianglesOnscreen = 0;
 
